@@ -101,4 +101,77 @@ describe InterpretService do
       expect(response).to match("Questão inválida, verifique o Id")
     end
   end
+
+  describe '#list_link' do
+    it "with zero links, return don't find message" do
+      response = InterpretService.call('list_link', {})
+      expect(response).to match("Nada encontrado")
+    end
+
+    it "with two links, find description and url in response" do
+      link1 = create(:link, company: @company)
+      link2 = create(:link, company: @company)
+
+      response = InterpretService.call('list_link', {})
+
+      expect(response).to match(link1.description)
+      expect(response).to match(link1.url)
+
+      expect(response).to match(link2.description)
+      expect(response).to match(link2.url)
+    end
+  end
+
+  describe '#search_link' do
+    it "with empty query, return don't find message" do
+      response = InterpretService.call('search_link', {"query": ''})
+      expect(response).to match("Nada encontrado")
+    end
+
+    it "with valid query, find description and url in response" do
+      link = create(:link, company: @company)
+
+      response = InterpretService.call('search_link', {"query" => link.description.split(" ").sample})
+
+      expect(response).to match(link.description)
+      expect(response).to match(link.url)
+    end
+  end
+
+  describe '#create_link' do
+    before do
+      @description = FFaker::Lorem.sentence
+      @url = FFaker::Internet.http_url
+    end
+
+    it "without url will receive an error" do
+      response = InterpretService.call('create_link', {"description-original" => @description, "url-original" => @url})
+      expect(response).to match("Criado com sucesso")
+    end
+
+    it "with valid params will receive a success message" do
+      response = InterpretService.call('create_link', {"description-original" => @description, "url-original" => @url})
+      expect(response).to match("Criado com sucesso")
+    end
+
+    it "with valid params will persist the new link" do
+      response = InterpretService.call('create_link', {"description-original" => @description, "url-original" => @url})
+      expect(Link.last.description).to match(@description)
+      expect(Link.last.url).to match(@url)
+    end
+  end
+
+  describe 'remove_link' do
+    it "with valid id, remove Link" do
+      link = create(:link, company: @company)
+      response = InterpretService.call('remove_link', {"id" => link.id})
+      expect(response).to match("Deletado com sucesso")
+    end
+
+    it "with invalid id, receive error message" do
+      response = InterpretService.call('remove_link', {"id" => rand(1..9999)})
+      expect(response).to match("Link inválido")
+    end
+  end
+
 end
