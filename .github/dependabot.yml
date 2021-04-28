@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: bundler
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "08:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: activerecord
+    versions:
+    - 6.1.2
+  - dependency-name: ffaker
+    versions:
+    - 2.17.0
+  - dependency-name: rack
+    versions:
+    - 2.2.3
+  - dependency-name: database_cleaner
+    versions:
+    - 1.8.5
